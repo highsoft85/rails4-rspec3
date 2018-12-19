@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 feature "About BigCo modal" do
-  scenario "toggles display of the modal about display", js: true do
+  scenario "toggles display of the modal about display", js: true, slow: true do
     visit root_path
 
     expect(page).not_to have_content 'About BigCo'

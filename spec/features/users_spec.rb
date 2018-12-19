@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 feature 'User management' do
-  scenario "adds a new user", js: true do
+  scenario "adds a new user", js: true, slow: true do
     admin = create(:admin)
     sign_in admin
 
