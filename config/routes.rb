@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+
   get 'login', to: 'sessions#new', as: 'login'
   get 'logout', to: 'sessions#destroy', as: 'logout'
 
@@ -6,6 +7,7 @@ Rails.application.routes.draw do
   resources :sessions
 
   resources :contacts
+  resources :news_releases
 
   root 'contacts#index'
 end
