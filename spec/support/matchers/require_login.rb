@@ -1,6 +1,7 @@
 RSpec::Matchers.define :require_login do |expected|
   match do |actual|
-    expect(actual).to redirect_to Rails.application.routes.url_helpers.login_path
+    expect(actual).to redirect_to \
+      Rails.application.routes.url_helpers.login_path
   end
 
   failure_message do |actual|

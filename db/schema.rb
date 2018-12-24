@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140916022631) do
+ActiveRecord::Schema.define(version: 20181220092213) do
 
   create_table "contacts", force: true do |t|
     t.string   "firstname"
@@ -37,7 +37,7 @@ ActiveRecord::Schema.define(version: 20140916022631) do
     t.datetime "updated_at"
   end
 
-  add_index "phones", ["contact_id"], name: "index_phones_on_contact_id"
+  add_index "phones", ["contact_id"], name: "index_phones_on_contact_id", using: :btree
 
   create_table "users", force: true do |t|
     t.string   "email"

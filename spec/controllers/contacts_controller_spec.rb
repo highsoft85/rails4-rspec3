@@ -4,9 +4,7 @@ describe ContactsController do
   let(:admin) { build_stubbed(:admin) }
   let(:user) { build_stubbed(:user) }
 
-  let(:contact) do
-    create(:contact, firstname: 'Lawrence', lastname: 'Smith')
-  end
+  let(:contact) { create(:contact, firstname: 'Lawrence', lastname: 'Smith')}
 
   let(:phones) do
     [
@@ -19,7 +17,8 @@ describe ContactsController do
   let(:valid_attributes) { attributes_for(:contact) }
   let(:invalid_attributes) { attributes_for(:invalid_contact) }
 
-  shared_examples_for 'public access to contacts' do
+  # -------------------------------------------------------------------
+  shared_examples 'public access to contacts' do
     describe 'GET #index' do
       context 'with params[:letter]' do
         it "populates an array of contacts starting with the letter" do
@@ -55,12 +54,12 @@ describe ContactsController do
         firstname: 'Lawrence', lastname: 'Smith') }
 
       before :each do
-        allow(Contact).to receive(:persisted?).and_return(true)
+        # allow(Contact).to receive(:persisted?).and_return(true)
         allow(Contact).to \
           receive(:order).with('lastname, firstname').and_return([contact])
         allow(Contact).to \
           receive(:find).with(contact.id.to_s).and_return(contact)
-        allow(Contact).to receive(:save).and_return(true)
+        # allow(Contact).to receive(:save).and_return(true)
 
         get :show, id: contact
       end
@@ -75,6 +74,7 @@ describe ContactsController do
     end
   end
 
+  # -------------------------------------------------------------------
   shared_examples 'full access to contacts' do
     describe 'GET #new' do
       it "assigns a new Contact to @contact" do
@@ -110,7 +110,7 @@ describe ContactsController do
       end
     end
 
-    describe "POST #create" do
+    describe 'POST #create' do
       before :each do
         @phones = [
           attributes_for(:phone),
@@ -168,7 +168,7 @@ describe ContactsController do
           expect(assigns(:contact)).to eq @contact
         end
 
-        it "changes the contact's attributes" do
+        it "changes @contact's attributes" do
           patch :update, id: @contact,
             contact: attributes_for(:contact,
               firstname: 'Larry',
@@ -187,7 +187,7 @@ describe ContactsController do
 
       context "invalid attributes" do
         before :each do
-          allow(contact).to receive(:update).with(invalid_attributes.stringify_keys) { false }
+          allow(contact).to receive(:update).with(invalid_attributes.stringify_keys) { true }
           patch :update, id: contact, contact: invalid_attributes
         end
 
@@ -195,8 +195,27 @@ describe ContactsController do
           expect(assigns(:contact)).to eq contact
         end
 
-        it "does not change the contact's attributes" do
-          expect(assigns(:contact).reload.attributes).to eq contact.attributes
+        it "does not change @contact's attributes" do
+          ## On sqlite
+          # expect(assigns(:contact).reload.attributes).to eq contact.attributes
+
+          ## On mysql method 1
+          ## Note: in mysql, datetime values are different in milliseconds.
+          ## So we need to compare each attributes values directly
+          ## or do it after making the 2 objects timestamp values equal
+          old_contact = assigns(:contact).reload
+          contact.updated_at, contact.created_at = old_contact.updated_at, old_contact.created_at
+          expect(old_contact.attributes).to eq contact.attributes
+          
+          ## On mysql method 2
+          # old_contact = assigns(:contact).reload
+          # expect(old_contact.id).to eq contact.id
+          # expect(old_contact.firstname).to eq contact.firstname
+          # expect(old_contact.lastname).to eq contact.lastname
+          # expect(old_contact.email).to eq contact.email
+
+          # expect(old_contact.updated_at).to eq contact.updated_at
+          # expect(old_contact.created_at).to eq contact.created_at
         end
 
         it "re-renders the edit method" do
@@ -214,36 +233,39 @@ describe ContactsController do
         contact
         expect{
           delete :destroy, id: contact
-        }.to change(Contact,:count).by(-1)
+        }.to change(Contact, :count).by(-1)
       end
 
-      it "redirects to contacts#index" do
+      it "redirects to the contacts#index" do
         delete :destroy, id: @contact
         expect(response).to redirect_to contacts_url
       end
     end
   end
 
-  describe "administrator access" do
+  # -------------------------------------------------------------------
+  describe "admin access to contacts" do
     before :each do
       allow(controller).to receive(:current_user).and_return(admin)
     end
 
-    it_behaves_like 'public access to contacts'
-    it_behaves_like 'full access to contacts'
+    it_behaves_like "public access to contacts"
+    it_behaves_like "full access to contacts"
   end
 
-  describe "user access" do
+  # -------------------------------------------------------------------
+  describe "user access to contacts" do
     before :each do
       allow(controller).to receive(:current_user).and_return(user)
     end
 
-    it_behaves_like 'public access to contacts'
-    it_behaves_like 'full access to contacts'
+    it_behaves_like "public access to contacts"
+    it_behaves_like "full access to contacts"
   end
 
-  describe "guest access" do
-    it_behaves_like 'public access to contacts'
+  # -------------------------------------------------------------------
+  describe "guest access to contacts" do
+    it_behaves_like "public access to contacts"
 
     describe 'GET #new' do
       it "requires login" do
@@ -260,7 +282,7 @@ describe ContactsController do
       end
     end
 
-    describe "POST #create" do
+    describe 'POST #create' do
       it "requires login" do
         post :create, id: create(:contact),
           contact: attributes_for(:contact)
@@ -268,7 +290,7 @@ describe ContactsController do
       end
     end
 
-    describe 'PUT #update' do
+    describe 'PATCH #update' do
       it "requires login" do
         put :update, id: create(:contact),
           contact: attributes_for(:contact)
@@ -279,7 +301,7 @@ describe ContactsController do
     describe 'DELETE #destroy' do
       it "requires login" do
         delete :destroy, id: create(:contact)
-        expect(response).to require_login
+        expect(:response).to require_login
       end
     end
   end

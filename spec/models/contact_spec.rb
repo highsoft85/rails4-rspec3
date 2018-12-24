@@ -11,9 +11,9 @@ describe Contact do
   it { is_expected.to validate_uniqueness_of(:email) }
 
   it "returns a contact's full name as a string" do
-    contact = build_stubbed(:contact,
-      firstname: 'Jane',
-      lastname: 'Smith'
+    contact = build(:contact,
+      firstname: "Jane",
+      lastname: "Smith"
     )
     expect(contact.name).to eq 'Jane Smith'
   end
@@ -41,13 +41,13 @@ describe Contact do
       )
     end
 
-    context "with matching letters" do
+    context "matching letters" do
       it "returns a sorted array of results that match" do
         expect(Contact.by_letter("J")).to eq [@johnson, @jones]
       end
     end
 
-    context "with non-matching letters" do
+    context "non-matching letters" do
       it "omits results that do not match" do
         expect(Contact.by_letter("J")).not_to include @smith
       end
