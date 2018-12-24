@@ -196,7 +196,26 @@ describe ContactsController do
         end
 
         it "does not change @contact's attributes" do
-          expect(assigns(:contact).reload.attributes).to eq contact.attributes
+          ## On sqlite
+          # expect(assigns(:contact).reload.attributes).to eq contact.attributes
+
+          ## On mysql method 1
+          ## Note: in mysql, datetime values are different in milliseconds.
+          ## So we need to compare each attributes values directly
+          ## or do it after making the 2 objects timestamp values equal
+          old_contact = assigns(:contact).reload
+          contact.updated_at, contact.created_at = old_contact.updated_at, old_contact.created_at
+          expect(old_contact.attributes).to eq contact.attributes
+          
+          ## On mysql method 2
+          # old_contact = assigns(:contact).reload
+          # expect(old_contact.id).to eq contact.id
+          # expect(old_contact.firstname).to eq contact.firstname
+          # expect(old_contact.lastname).to eq contact.lastname
+          # expect(old_contact.email).to eq contact.email
+
+          # expect(old_contact.updated_at).to eq contact.updated_at
+          # expect(old_contact.created_at).to eq contact.created_at
         end
 
         it "re-renders the edit method" do
